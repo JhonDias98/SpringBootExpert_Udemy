@@ -4,10 +4,12 @@ import io.github.JhonDias98.domain.entity.Cliente;
 import io.github.JhonDias98.domain.entity.ItemPedido;
 import io.github.JhonDias98.domain.entity.Pedido;
 import io.github.JhonDias98.domain.entity.Produto;
+import io.github.JhonDias98.domain.enums.StatusPedido;
 import io.github.JhonDias98.domain.repository.Clientes;
 import io.github.JhonDias98.domain.repository.ItemsPedido;
 import io.github.JhonDias98.domain.repository.Pedidos;
 import io.github.JhonDias98.domain.repository.Produtos;
+import io.github.JhonDias98.exception.PedidoNaoEncontradoException;
 import io.github.JhonDias98.exception.RegraNegocioException;
 import io.github.JhonDias98.rest.dto.ItemPedidoDTO;
 import io.github.JhonDias98.rest.dto.PedidoDTO;
@@ -42,6 +44,7 @@ public class PedidoServiceImpl implements PedidoService{
         pedido.setTotal(dto.getTotal());
         pedido.setDataPedido(LocalDate.now());
         pedido.setCliente(cliente);
+        pedido.setStatus(StatusPedido.REALIZADO);
 
         List<ItemPedido> itensPedidos = converterItens(pedido, dto.getItems());
         repository.save(pedido);
@@ -54,6 +57,17 @@ public class PedidoServiceImpl implements PedidoService{
     @Override
     public Optional<Pedido> obterPedidoCompleto(Integer id) {
         return repository.findByIdFetchItens(id);
+    }
+
+    @Override
+    @Transactional
+    public void atualizaStatus(Integer id, StatusPedido statusPedido) {
+        repository
+                .findById(id)
+                .map(pedido -> {
+                    pedido.setStatus(statusPedido);
+                    return repository.save(pedido);
+                }).orElseThrow(() -> new PedidoNaoEncontradoException());
     }
 
     private List<ItemPedido> converterItens(Pedido pedido, List<ItemPedidoDTO> itens) {

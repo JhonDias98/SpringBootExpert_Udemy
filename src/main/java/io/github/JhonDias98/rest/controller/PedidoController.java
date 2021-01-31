@@ -2,10 +2,13 @@ package io.github.JhonDias98.rest.controller;
 
 import io.github.JhonDias98.domain.entity.ItemPedido;
 import io.github.JhonDias98.domain.entity.Pedido;
+import io.github.JhonDias98.domain.enums.StatusPedido;
+import io.github.JhonDias98.rest.dto.AtualizacaoStatusPedidoDTO;
 import io.github.JhonDias98.rest.dto.InformacoesItemDTO;
 import io.github.JhonDias98.rest.dto.InformacoesPedidoDTO;
 import io.github.JhonDias98.rest.dto.PedidoDTO;
 import io.github.JhonDias98.service.PedidoService;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -44,6 +47,14 @@ public class PedidoController {
                         new ResponseStatusException(NOT_FOUND, "Pedido não encontrado"));
     }
 
+    @PatchMapping("{id}")
+    @ResponseStatus(NO_CONTENT)
+    public void updateStatus(@PathVariable Integer id,
+                             @RequestBody AtualizacaoStatusPedidoDTO dto) {
+        String novoStatus = dto.getNovoStatus();
+        service.atualizaStatus(id, StatusPedido.valueOf(novoStatus));
+    }
+
     private InformacoesPedidoDTO converter(Pedido pedido) {
         return InformacoesPedidoDTO
                 .builder()
@@ -52,6 +63,7 @@ public class PedidoController {
                 .cpf(pedido.getCliente().getCpf())
                 .nomeCliente(pedido.getCliente().getNome())
                 .total(pedido.getTotal())
+                .status(pedido.getStatus().name())
                 .itens(converter(pedido.getItens()))
                 .build();
     }
