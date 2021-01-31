@@ -61,7 +61,7 @@ public class PedidoServiceImpl implements PedidoService{
             Produto produto = produtosRepository
                     .findById(idProdto)
                     .orElseThrow(() -> new RegraNegocioException(
-                            "Código do produto inválido." + idProdto
+                            "Código do produto inválido:" + idProdto
                     ));
 
             ItemPedido itemPedido = new ItemPedido();
